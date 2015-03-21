@@ -1,5 +1,8 @@
 package ist.meic.pa;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -8,9 +11,12 @@ public class DebuggerCLI {
 	public static void main(String[] args) {
 		try {
 			Class program = Class.forName(args[0]);
-			Method program_main = program.getMethod("main", null);
+			Method program_main = program.getMethod("main", String[].class);
+			
+			String[] params = null;
+			
 			program_main.setAccessible(true);
-			program_main.invoke(program, null);
+			program_main.invoke(program, (Object) params);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -30,6 +36,39 @@ public class DebuggerCLI {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public void run() {
+		
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String instruction = "default";
+		
+		try {
+			instruction = br.readLine();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String delims = "[ ]+";
+		String[] cmd = instruction.split(delims);
+		
+		if (cmd[0].equals("Abort"))
+			abort();
+		else if (cmd[0].equals("Info"))
+			info();
+		else if (cmd[0].equals("Throw"))
+			throwagain();
+		else if (cmd[0].equals("Return"))
+			returnval(Integer.parseInt(cmd[1]));
+		else if (cmd[0].equals("Get"))
+			getfield(cmd[1]);
+		else if (cmd[0].equals("Set"))
+			setfield(cmd[1], cmd[2]);
+		else if (cmd[0].equals("Retry"))
+			retry();
+		else
+			System.out.println("The command insert is not valid! Please insert a valid command.");
 	}
 	
 	public void abort(){
