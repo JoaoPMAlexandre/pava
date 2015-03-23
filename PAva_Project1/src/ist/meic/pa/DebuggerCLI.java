@@ -2,40 +2,36 @@ package ist.meic.pa;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Stack;
 
-public class DebuggerCLI {
+import javassist.*;
+
+public class DebuggerCLI extends ClassLoader {
 	
-	public static void main(String[] args) {
+	
+	public static void main(String[] args) throws Throwable {
+		Class<?> rtClass = null;
 		try {
-			Class<?> program = Class.forName(args[0]);
-			Method program_main = program.getMethod("main", String[].class);
+			ClassPool pool = ClassPool.getDefault();
+			CtClass ctClass = pool.getCtClass(args[0]);
+			rtClass = ctClass.toClass();
 			
-			String[] params = null;
+			Method main = rtClass.getMethod("main", args.getClass());
+	        main.invoke(null, new Object[] { args });
+
+		}
+		catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
 			
-			program_main.setAccessible(true);
-			program_main.invoke(program, (Object) params);
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+			/*StackTraceElement[] stackarray = e.getStackTrace();
+			for (StackTraceElement s : stackarray){
+				System.out.println(s.getMethodName());
+			}*/
 			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			DebuggFunctions deb = new DebuggFunctions();
-			deb.run();
+			DebuggFunctions debugger = new DebuggFunctions();
+			debugger.run(rtClass);
 		}
 	}
-	
-	
+
 }
