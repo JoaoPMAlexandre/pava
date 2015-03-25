@@ -25,8 +25,7 @@ public class MyTranslator implements Translator {
         		        public void edit(MethodCall mc)
         		                      throws CannotCompileException
         		        {
-        		        	//mc.getMethod();
-        		          mc.replace("{DebuggFunctions.trycatch(mc, $$); $_ = $proceed($$); }");
+        		        	mc.replace("{DebuggFunctions.trycatch(this.getMethod(), $args); $_ = $proceed($$); }");
         		        }
         		       
         		        

@@ -3,15 +3,24 @@ package ist.meic.pa;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
+
 import javassist.*;
+
 import java.util.Stack;
 
 
 public final class DebuggFunctions {
 
-public static void trycatch(Object objectToInvoke, Object[] args){
-	
-	
+public static void trycatch(CtMethod methodToInvoke, Object[] args){
+	try{
+		Class<?> cl = methodToInvoke.getClass();
+		Method methodFromClass = cl.getMethod(methodToInvoke.getName(), (Class<?>[]) args);
+		methodFromClass.invoke(args);
+	}
+	catch(Exception e){
+		runDebugger();
+	}
 }
 	
 public static void runDebugger() {
