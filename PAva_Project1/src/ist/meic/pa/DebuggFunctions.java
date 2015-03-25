@@ -7,17 +7,22 @@ import javassist.*;
 import java.util.Stack;
 
 
-public class DebuggFunctions {
+public final class DebuggFunctions {
 
+public static void trycatch(Object objectToInvoke, Object[] args){
 	
-public void run(Class<?> rtClass) {
 	
+}
+	
+public static void runDebugger() {
+	
+		
 		System.out.println("Welcome to Debugger");
 		System.out.println("Insert a command:");
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String instruction = "default";
 		
-		while(!instruction.toLowerCase().equals("abort")){
+		while(true){
 			try {
 				instruction = br.readLine();
 			} catch (IOException e) {
@@ -28,53 +33,54 @@ public void run(Class<?> rtClass) {
 			String[] cmd = instruction.split(delims);
 			
 			if (cmd[0].toLowerCase().equals("info"))
-				info(rtClass);
+				info();
 			else if (cmd[0].toLowerCase().equals("throw"))
-				throwagain(rtClass);
+				throwagain();
 			else if (cmd[0].toLowerCase().equals("return"))
-				returnval(Integer.parseInt(cmd[1]), rtClass);
+				returnval(Integer.parseInt(cmd[1]));
 			else if (cmd[0].toLowerCase().equals("get"))
-				getfield(cmd[1], rtClass);
+				getfield(cmd[1]);
 			else if (cmd[0].toLowerCase().equals("set"))
-				setfield(cmd[1], cmd[2], rtClass);
+				setfield(cmd[1], cmd[2]);
 			else if (cmd[0].toLowerCase().equals("retry"))
-				retry(rtClass);
+				retry();
+			else if (cmd[0].toLowerCase().equals("abort"))
+				System.exit(1);
 			else if (!cmd[0].toLowerCase().equals("abort"))
 				System.out.println("The command insert is not valid! Please insert a valid command.");
 		}
 	}
 	
 
-	public void retry(Class<?> rtClass) {
+	public static void retry() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void getfield(String gets, Class<?> rtClass) {
+	public static void getfield(String gets) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void setfield(String sets, String vals, Class<?> rtClass) {
+	public static void setfield(String sets, String vals) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void returnval(int ret, Class<?> rtClass) {
+	public static void returnval(int ret) {
 		
 		
 	}
 
-	public void throwagain(Class<?> rtClass) {
+	public static void throwagain() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void info(Class<?> rtClass) {
+	public static void info() {
 		
 
 		//DUMPCLASS FOR DESCRIPTION OF THIS CLASS
-		
 		System.out.println("Called Object:");
 		
 	}
