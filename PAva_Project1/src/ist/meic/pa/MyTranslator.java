@@ -2,6 +2,7 @@ package ist.meic.pa;
 
 
 import javassist.*;
+import javassist.bytecode.MethodInfo;
 import javassist.expr.ExprEditor;
 import javassist.expr.Handler;
 import javassist.expr.MethodCall;
@@ -21,14 +22,11 @@ public class MyTranslator implements Translator {
         	/*m.addCatch("{System.out.println($e); "
         			+ "Object obj = this;  DebuggFunctions.runDebugger(obj, MyTranslator.getrethrow(); throw $e;}", exception);*/
         	m.instrument(
-        		    	new ExprEditor() {
+        		    new ExprEditor() {
         		        public void edit(MethodCall mc)
-        		                      throws CannotCompileException
-        		        {
-        		        	mc.replace("{DebuggFunctions.trycatch(this.getMethod(), $args); $_ = $proceed($$); }");
+        		                      throws CannotCompileException {
+         		        	mc.replace("{DebuggFunctions.trycatch($0, \"" + mc.getMethodName() + "\", $args); $_ = $proceed($$); }");
         		        }
-        		       
-        		        
         		    });
         }
     }

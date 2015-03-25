@@ -6,22 +6,33 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 
 import javassist.*;
+import javassist.expr.MethodCall;
 
 import java.util.Stack;
 
 
 public final class DebuggFunctions {
 
-public static void trycatch(CtMethod methodToInvoke, Object[] args){
-	try{
-		Class<?> cl = methodToInvoke.getClass();
-		Method methodFromClass = cl.getMethod(methodToInvoke.getName(), (Class<?>[]) args);
-		methodFromClass.invoke(args);
+	/*public static void trycatch(MethodCall methodToInvoke, Object[] args){
+		try{
+			Class<?> cl = methodToInvoke.getClass();
+			Method methodFromClass = cl.getMethod(methodToInvoke.getMethodName(), (Class<?>[]) args);
+			methodFromClass.invoke(args);
+		}
+		catch(Exception e){
+			runDebugger();
+		}
+	}*/
+	
+	public static void trycatch(Object currentClass, String methodName, Object[] args){
+		try{
+			Method methodFromClass = ((Class<?>)currentClass).getMethod(methodName, (Class<?>[]) args);
+			methodFromClass.invoke(args);
+		}
+		catch(Exception e){
+			runDebugger();
+		}
 	}
-	catch(Exception e){
-		runDebugger();
-	}
-}
 	
 public static void runDebugger() {
 	
