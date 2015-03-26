@@ -15,19 +15,18 @@ public class MyTranslator implements Translator {
         throws NotFoundException, CannotCompileException
     {
         CtClass cc = pool.get(classname);
-        CtClass exception = pool.get("java.lang.Exception");
         cc.setModifiers(Modifier.PUBLIC);
         CtMethod[] methods = cc.getDeclaredMethods();
         for(CtMethod m : methods){
-        	/*m.addCatch("{System.out.println($e); "
-        			+ "Object obj = this;  DebuggFunctions.runDebugger(obj, MyTranslator.getrethrow(); throw $e;}", exception);*/
-        	m.instrument(
-        		    new ExprEditor() {
-        		        public void edit(MethodCall mc)
-        		                      throws CannotCompileException {
-         		        	mc.replace("{DebuggFunctions.trycatch($0, \"" + mc.getMethodName() + "\", $args); $_ = $proceed($$); }");
-        		        }
-        		    });
+	        if(!classname.equals("ist.meic.pa.DebuggFunctions") && !classname.equals("ist.meic.pa.DebuggerCLI")){	
+	        	m.instrument(
+	        		    new ExprEditor() {
+	        		        public void edit(MethodCall mc)
+	        		                      throws CannotCompileException {
+	         		        	mc.replace("{DebuggFunctions.trycatch(\"" + mc.getClassName() + "\", $0, \"" + mc.getMethodName() + "\", $args); $_ = $proceed($$); }");
+	        		        }
+	        		    });
+	        }
         }
     }
 }

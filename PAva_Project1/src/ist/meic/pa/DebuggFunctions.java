@@ -24,12 +24,19 @@ public final class DebuggFunctions {
 		}
 	}*/
 	
-	public static void trycatch(Object currentClass, String methodName, Object[] args){
+	public static void trycatch(String classname, Object currentClass, String methodName, Object[] args){
 		try{
-			Method methodFromClass = ((Class<?>)currentClass).getMethod(methodName, (Class<?>[]) args);
+			Class<?> classassigned = Class.forName(classname);
+			Class<?>[] arguments = new Class<?>[args.length];
+			for(int i=0 ; i < args.length ; i++){
+				arguments[i] = args[i].getClass();
+			}
+			Method methodFromClass = classassigned.getMethod(methodName, arguments);
 			methodFromClass.invoke(args);
 		}
 		catch(Exception e){
+			System.out.println(e);
+			e.printStackTrace();
 			runDebugger();
 		}
 	}
@@ -37,8 +44,7 @@ public final class DebuggFunctions {
 public static void runDebugger() {
 	
 		
-		System.out.println("Welcome to Debugger");
-		System.out.println("Insert a command:");
+		System.out.println("DebuggerCLI>");
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String instruction = "default";
 		
@@ -99,7 +105,6 @@ public static void runDebugger() {
 
 	public static void info() {
 		
-
 		//DUMPCLASS FOR DESCRIPTION OF THIS CLASS
 		System.out.println("Called Object:");
 		
