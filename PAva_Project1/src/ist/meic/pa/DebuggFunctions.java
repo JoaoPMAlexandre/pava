@@ -13,7 +13,7 @@ import java.util.Stack;
 
 public final class DebuggFunctions {
 	
-	public static void trycatch(String classname, Object currentClass, String methodName, Object[] args){
+	public static Object trycatch(String classname, Object currentClass, String methodName, Object[] args){
 		try{
 			Class<?> classassigned = Class.forName(classname);
 			Class<?>[] arguments = new Class<?>[args.length];
@@ -41,23 +41,22 @@ public final class DebuggFunctions {
 			methodFromClass.invoke(classassigned.cast(currentClass), args);
 		}
 		catch(Exception e){
-			System.out.println(e);
-			e.printStackTrace();
+			System.out.println(e.getCause());
 			runDebugger();
 		}
+		return null;
 	}
 	
 public static void runDebugger() {
 	
 		
-		System.out.println("DebuggerCLI>");
+		System.out.print("DebuggerCLI> ");
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String instruction = "default";
 		
 		while(true){
 			try {
-				instruction = br.readLine();
-			} catch (IOException e) {
+				instruction = br.readLine();			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -80,6 +79,8 @@ public static void runDebugger() {
 				System.exit(1);
 			else if (!cmd[0].toLowerCase().equals("abort"))
 				System.out.println("The command insert is not valid! Please insert a valid command.");
+			
+			System.out.print("DebuggerCLI> ");
 		}
 	}
 	

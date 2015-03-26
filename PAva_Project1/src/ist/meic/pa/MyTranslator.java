@@ -23,7 +23,8 @@ public class MyTranslator implements Translator {
 	        		    new ExprEditor() {
 	        		        public void edit(MethodCall mc)
 	        		                      throws CannotCompileException {
-	         		        	mc.replace("{DebuggFunctions.trycatch(\"" + mc.getClassName() + "\", $0, \"" + mc.getMethodName() + "\", $args); $_ = $proceed($$); }");
+	        		        	mc.replace("{$_ = ($r) DebuggFunctions.trycatch(\"" + mc.getClassName() + "\", $0, \"" + mc.getMethodName() + "\", $args); }");
+	        		        //	mc.replace("{DebuggFunctions.trycatch(\"" + mc.getClassName() + "\", $0, \"" + mc.getMethodName() + "\", $args); $_ = $proceed($$); }");
 	        		        }
 	        		    });
 	        }
