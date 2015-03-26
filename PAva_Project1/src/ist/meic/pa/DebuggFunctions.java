@@ -12,17 +12,6 @@ import java.util.Stack;
 
 
 public final class DebuggFunctions {
-
-	/*public static void trycatch(MethodCall methodToInvoke, Object[] args){
-		try{
-			Class<?> cl = methodToInvoke.getClass();
-			Method methodFromClass = cl.getMethod(methodToInvoke.getMethodName(), (Class<?>[]) args);
-			methodFromClass.invoke(args);
-		}
-		catch(Exception e){
-			runDebugger();
-		}
-	}*/
 	
 	public static void trycatch(String classname, Object currentClass, String methodName, Object[] args){
 		try{
@@ -30,9 +19,26 @@ public final class DebuggFunctions {
 			Class<?>[] arguments = new Class<?>[args.length];
 			for(int i=0 ; i < args.length ; i++){
 				arguments[i] = args[i].getClass();
+				if(arguments[i].getName().equals("java.lang.Integer"))
+					arguments[i] = int.class;
+				else if(arguments[i].getName().equals("java.lang.Byte"))
+					arguments[i] = byte.class;
+				else if(arguments[i].getName().equals("java.lang.Short"))
+					arguments[i] = short.class;
+				else if(arguments[i].getName().equals("java.lang.Long"))
+					arguments[i] = long.class;
+				else if(arguments[i].getName().equals("java.lang.Float"))
+					arguments[i] = float.class;
+				else if(arguments[i].getName().equals("java.lang.Double"))
+					arguments[i] = double.class;
+				else if(arguments[i].getName().equals("java.lang.Character"))
+					arguments[i] = char.class;
+				else if(arguments[i].getName().equals("java.lang.Boolean"))
+					arguments[i] = boolean.class;
 			}
 			Method methodFromClass = classassigned.getMethod(methodName, arguments);
-			methodFromClass.invoke(args);
+			methodFromClass.setAccessible(true);
+			methodFromClass.invoke(classassigned.cast(currentClass), args);
 		}
 		catch(Exception e){
 			System.out.println(e);
