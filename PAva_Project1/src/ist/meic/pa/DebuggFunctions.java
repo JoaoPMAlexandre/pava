@@ -5,16 +5,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-import javassist.*;
 import javassist.expr.MethodCall;
 
-import java.util.Stack;
-
 public final class DebuggFunctions {
+	
+	public static HashMap<String, ArrayList<String>> callStack = new HashMap<String, ArrayList<String>>();
 
 	public static Object trycatch(String classname, Object currentClass,
 			String methodName, Object[] args) throws Exception {
+		
+		String name = new String();
 		try {
 			Class<?> classassigned = Class.forName(classname);
 			Class<?>[] arguments = new Class<?>[args.length];
@@ -40,8 +43,27 @@ public final class DebuggFunctions {
 			Method methodFromClass = classassigned.getMethod(methodName,
 					arguments);
 			methodFromClass.setAccessible(true);
+			name = classassigned.getName() + "." + methodFromClass.getName();
+			
+			ArrayList<String> method_args = new ArrayList<String>();
+			for (Object arg : args) {
+				//if (arg.toString().contains(ist.meic.pa.DebuggerCLI.arg))
+					method_args.add(arg.toString());
+			}
+			//if(!name.contains("java.io"))
+				callStack.put(name, method_args);
+			
 			methodFromClass.invoke(classassigned.cast(currentClass), args);
 		} catch (Exception e) {
+			String method_args = new String();
+			
+			for (String key : callStack.keySet()) {
+				method_args = "";
+				for (String arg : callStack.get(key)) {
+					method_args += arg; 
+				}
+				System.out.println(key + "(" + method_args + ")");
+			}
 			System.out.println(e.getCause());
 			runDebugger(e, classname, currentClass, methodName, args);
 		}
