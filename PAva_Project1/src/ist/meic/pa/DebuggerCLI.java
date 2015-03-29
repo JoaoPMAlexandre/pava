@@ -7,7 +7,7 @@ public class DebuggerCLI extends ClassLoader {
 
 	
 	public static void main(String[] args) throws Throwable {
-		String arg = args[0];
+	//	String arg = args[0];
 		ClassPool pool = ClassPool.getDefault();
 		Translator mytranslator = new MyTranslator();
 		pool.importPackage("ist.meic.pa.DebuggFunctions");

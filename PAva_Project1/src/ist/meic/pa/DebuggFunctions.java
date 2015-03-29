@@ -8,10 +8,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.sun.javafx.scene.paint.GradientUtils.Parser;
-
-import javassist.expr.MethodCall;
-
 public final class DebuggFunctions {
 	
 	public static HashMap<String, ArrayList<String>> callStack 
@@ -185,29 +181,79 @@ public static void setfield(String fieldname, Object currentClass, String val) {
         	try {
         		//only can set primitive types so far.
         		Object value = null;
-        		if(field.getType().equals(Integer.TYPE))
-        			value = Integer.parseInt(val);
-        		else if(field.getType().equals(Double.TYPE))
-        			value = Double.parseDouble(val);
-        		else if(field.getType().equals(Byte.TYPE))
-        			value = Byte.parseByte(val);
-        		else if(field.getType().equals(Short.TYPE))
-        			value = Short.parseShort(val);
-        		else if(field.getType().equals(Long.TYPE))
-        			value = Long.parseLong(val);
-        		else if(field.getType().equals(Float.TYPE))
-        			value = Float.parseFloat(val);
-        		else if(field.getType().equals(Character.TYPE))
-        			value = val.charAt(0);
-        		else if(field.getType().equals(Boolean.TYPE))
-        			value = Boolean.parseBoolean(val);
+        		if(field.getType().equals(Integer.TYPE)){
+        			try{
+        				value = Integer.parseInt(val);
+        			}
+        			catch (Exception e){
+        				System.out.println("Invalid set argument. This argument type is integer.");
+        			}
+        		}
+        			
+        		else if(field.getType().equals(Double.TYPE)){
+        			try{
+        				value = Double.parseDouble(val);
+        			}
+        			catch (Exception e){
+        				System.out.println("Invalid set argument. This argument type is double.");
+        			}
+        		}
+        		else if(field.getType().equals(Byte.TYPE)){
+        			try{
+        				value = Byte.parseByte(val);
+        			}
+        			catch (Exception e){
+        				System.out.println("Invalid set argument. This argument type is byte.");
+        			}
+        		}        		
+        		else if(field.getType().equals(Short.TYPE)){
+        			try{
+        				value = Short.parseShort(val);
+        			}
+        			catch (Exception e){
+        				System.out.println("Invalid set argument. This argument type is short.");
+        			}
+        		}                		
+        		else if(field.getType().equals(Long.TYPE)){
+        			try{
+        				value = Long.parseLong(val);
+        			}
+        			catch (Exception e){
+        				System.out.println("Invalid set argument. This argument type is long.");
+        			}
+        		}        		
+        		else if(field.getType().equals(Float.TYPE)){
+        			try{
+        				value = Float.parseFloat(val);
+        			}
+        			catch (Exception e){
+        				System.out.println("Invalid set argument. This argument type is float.");
+        			}
+        		}        		
+        		else if(field.getType().equals(Character.TYPE)){
+        			try{
+        				value = val.charAt(0);
+        			}
+        			catch (Exception e){
+        				System.out.println("Invalid set argument. This argument type is a character.");
+        			}
+        		}
+        		else if(field.getType().equals(Boolean.TYPE)){
+        			try{
+        				value = Boolean.parseBoolean(val);
+        			}
+        			catch (Exception e){
+        				System.out.println("Invalid set argument. This argument type is boolean.");
+        			}
+        		}
         		
         		field.set(currentClass, value);
         		
 			} 
         	catch (IllegalArgumentException|IllegalAccessException e) {
-				e.printStackTrace();
+        		//TODO
 			}
+
 		}
 
 	}
@@ -215,7 +261,7 @@ public static void setfield(String fieldname, Object currentClass, String val) {
 }
 
 public static void returnval(int ret) {
-
+	//TODO: implement
 }
 
 public static void throwagain(Exception e) throws Throwable {
