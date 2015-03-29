@@ -15,7 +15,7 @@ public final class DebuggFunctions {
 	public static HashMap<String, ArrayList<String>> callStack = new HashMap<String, ArrayList<String>>();
 
 	public static Object trycatch(String classname, Object currentClass,
-			String methodName, Object[] args) throws Exception {
+			String methodName, Object[] args) throws Throwable {
 		
 		String name = new String();
 		try {
@@ -71,7 +71,7 @@ public final class DebuggFunctions {
 	}
 
 	public static void runDebugger(Exception ex, String classname, Object currentClass, String methodName,
-			Object[] args) throws Exception {
+			Object[] args) throws Throwable {
 
 		System.out.print("DebuggerCLI> ");
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -128,14 +128,14 @@ public final class DebuggFunctions {
 
 	}
 
-	public static void throwagain(Exception e) throws Exception {
-		throw e;
+	public static void throwagain(Exception e) throws Throwable {
+		throw e.getCause();
 	}
 
 	public static void info(String className, Object currentClass, String methodName, Object[] args) {
 		try{
 			Class<?> classAssigned = Class.forName(className);
-			Field[] fields = classAssigned.getFields();
+			Field[] fields = classAssigned.getDeclaredFields();
 			String vars = new String();
 			String parsedCallStack = new String();
 			
