@@ -4,10 +4,10 @@ import javassist.*;
 
 public class DebuggerCLI extends ClassLoader {
 	
-	public static String arg = new String();
+
 	
 	public static void main(String[] args) throws Throwable {
-		arg = args[0];
+		String arg = args[0];
 		ClassPool pool = ClassPool.getDefault();
 		Translator mytranslator = new MyTranslator();
 		pool.importPackage("ist.meic.pa.DebuggFunctions");
