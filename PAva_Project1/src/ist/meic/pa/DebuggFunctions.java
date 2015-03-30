@@ -5,72 +5,50 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.lang.reflect.Type;
+import java.util.Stack;
 
 public final class DebuggFunctions {
 	
-	public static HashMap<String, ArrayList<String>> callStack 
-							= new HashMap<String, ArrayList<String>>();
-
+	public static Stack<String> callStack = new Stack<String>();
+	public static String name = new String();
+	public static Object returnVal = null;
+	
+	public static boolean retry = false;
+	
 	public static Object trycatch(String classname, Object currentClass,
 			String methodName, Object[] args) throws Throwable {
 		
-		String name = new String();
 		try {
 			Class<?> classassigned = Class.forName(classname);
-			Class<?>[] arguments = new Class<?>[args.length];
-			for (int i = 0; i < args.length; i++) {
-				arguments[i] = args[i].getClass();
-				if (arguments[i].getName().equals("java.lang.Integer"))
-				arguments[i] = int.class;
-			else if (arguments[i].getName().equals("java.lang.Byte"))
-				arguments[i] = byte.class;
-			else if (arguments[i].getName().equals("java.lang.Short"))
-				arguments[i] = short.class;
-			else if (arguments[i].getName().equals("java.lang.Long"))
-				arguments[i] = long.class;
-			else if (arguments[i].getName().equals("java.lang.Float"))
-				arguments[i] = float.class;
-			else if (arguments[i].getName().equals("java.lang.Double"))
-				arguments[i] = double.class;
-			else if (arguments[i].getName().equals("java.lang.Character"))
-				arguments[i] = char.class;
-			else if (arguments[i].getName().equals("java.lang.Boolean"))
-				arguments[i] = boolean.class;
-		}
-		Method methodFromClass = classassigned.getMethod(methodName,
+			
+			Class<?>[] arguments = convertArgs(args);
+			Method methodFromClass = classassigned.getMethod(methodName,
 				arguments);
-		methodFromClass.setAccessible(true);
-		name = classassigned.getName() + "." + methodFromClass.getName();
+			methodFromClass.setAccessible(true);
 		
-		ArrayList<String> method_args = new ArrayList<String>();
-		for (Object arg : args) {
-			//if (arg.toString().contains(ist.meic.pa.DebuggerCLI.arg))
-				method_args.add(arg.toString());
-		}
-		//if(!name.contains("java.io"))
-			callStack.put(name, method_args);
+		//if(classassigned.getName().contains(Class.forName(name).getPackage().getName()))
+			callStack.push(classassigned.getName() + "." + methodName + parseArgs(args));
 		
 		methodFromClass.invoke(classassigned.cast(currentClass), args);
+		
+		
 	} catch (Exception e) {
-		String method_args = new String();
-		
-		for (String key : callStack.keySet()) {
-			method_args = "";
-			for (String arg : callStack.get(key)) {
-				method_args += arg; 
-			}
-			System.out.println(key + "(" + method_args + ")");
-		}
-		
+
 		System.out.println(e.getCause());
-		runDebugger(e, classname, currentClass, methodName, args);
+		callStack.pop();
+		if(!retry){
+			//GUARDAR OS METODOS E ARGUMENTOS DA CALLSTACK
+			runDebugger(e, classname, currentClass, methodName, args);
+		}
 	}
 	return null;
 }
 
-public static void runDebugger(Exception ex, String classname, Object currentClass, String methodName,
+	
+
+
+public static Object runDebugger(Exception ex, String classname, Object currentClass, String methodName,
 		Object[] args) throws Throwable {
 
 	System.out.print("DebuggerCLI> ");
@@ -91,8 +69,10 @@ public static void runDebugger(Exception ex, String classname, Object currentCla
 			info(classname, currentClass, methodName, args);
 		else if (cmd[0].toLowerCase().equals("throw"))
 			throwagain(ex);
-		else if (cmd[0].toLowerCase().equals("return"))
-			returnval(Integer.parseInt(cmd[1]));
+		else if (cmd[0].toLowerCase().equals("return")){
+			returnVal = returner(cmd[1], classname, currentClass, methodName, args);
+			return returnVal;
+		}
 		else if (cmd[0].toLowerCase().equals("get"))
 			getfield(cmd[1], currentClass);
 		else if (cmd[0].toLowerCase().equals("set"))
@@ -109,39 +89,54 @@ public static void runDebugger(Exception ex, String classname, Object currentCla
 	}
 }
 
-public static void retry(String classname, Object currentClass, String methodname, Object[] args) {
-
-	try {
-		Class<?> classassigned = Class.forName(classname);
-		Class<?>[] arguments = new Class<?>[args.length];
-		for (int i = 0; i < args.length; i++) {
-			arguments[i] = args[i].getClass();
-			if (arguments[i].getName().equals("java.lang.Integer"))
-			arguments[i] = int.class;
-		else if (arguments[i].getName().equals("java.lang.Byte"))
-			arguments[i] = byte.class;
-		else if (arguments[i].getName().equals("java.lang.Short"))
-			arguments[i] = short.class;
-		else if (arguments[i].getName().equals("java.lang.Long"))
-			arguments[i] = long.class;
-		else if (arguments[i].getName().equals("java.lang.Float"))
-			arguments[i] = float.class;
-		else if (arguments[i].getName().equals("java.lang.Double"))
-			arguments[i] = double.class;
-		else if (arguments[i].getName().equals("java.lang.Character"))
-			arguments[i] = char.class;
-		else if (arguments[i].getName().equals("java.lang.Boolean"))
-			arguments[i] = boolean.class;
+public static String parseArgs(Object[] args){
+	String arguments = "(";
+	
+	for(int i = 0; i < args.length; i++){
+		Object o = args[i];
+		arguments += o.toString();
+		if(i != args.length - 1)
+			arguments += ",";
 	}
-	Method methodFromClass = classassigned.getMethod(methodname,
-			arguments);
-	methodFromClass.setAccessible(true);
-	methodFromClass.invoke(classassigned.cast(currentClass), args);
-	} 
-	catch (Exception e) {
-		System.out.println(e.getCause());
+	arguments += ")";
+	return arguments;
+}
+
+public static Class<?>[] convertArgs(Object[] args) {
+	
+	Class<?>[] arguments = new Class<?>[args.length];
+	for (int i = 0; i < args.length; i++) {
+		arguments[i] = args[i].getClass();
+		if (arguments[i].getName().equals("java.lang.Integer"))
+		arguments[i] = int.class;
+	else if (arguments[i].getName().equals("java.lang.Byte"))
+		arguments[i] = byte.class;
+	else if (arguments[i].getName().equals("java.lang.Short"))
+		arguments[i] = short.class;
+	else if (arguments[i].getName().equals("java.lang.Long"))
+		arguments[i] = long.class;
+	else if (arguments[i].getName().equals("java.lang.Float"))
+		arguments[i] = float.class;
+	else if (arguments[i].getName().equals("java.lang.Double"))
+		arguments[i] = double.class;
+	else if (arguments[i].getName().equals("java.lang.Character"))
+		arguments[i] = char.class;
+	else if (arguments[i].getName().equals("java.lang.Boolean"))
+		arguments[i] = boolean.class;
+	else if (arguments[i] == null)
+		arguments[i] = null;
 	}
 	
+	return arguments;
+}
+
+public static void retry(String classname, Object currentClass, String methodname, Object[] args) {
+	retry = true;
+	try {
+		trycatch(classname, currentClass, methodname, args);
+	} catch (Throwable e) {
+		System.out.println("Impossible call.");
+	}
 }
 
 public static void getfield(String fieldname, Object currentClass) {
@@ -156,16 +151,18 @@ public static void getfield(String fieldname, Object currentClass) {
         	field.setAccessible(true);
         	try {
         		value = field.get(currentClass);
+            	System.out.println(value.toString());
 			} 
         	catch (IllegalArgumentException|IllegalAccessException e) {
-				e.printStackTrace();
+        		System.out.println(e.getCause());
 			}
         	
-        	System.out.println(value.toString());
+
+        	return;
 		}
 
 	}
-			
+	System.out.println("Field not found.");		
 }
 
 
@@ -251,7 +248,7 @@ public static void setfield(String fieldname, Object currentClass, String val) {
         		
 			} 
         	catch (IllegalArgumentException|IllegalAccessException e) {
-        		//TODO
+        		System.out.println("Invalid argument to set");
 			}
 
 		}
@@ -260,12 +257,100 @@ public static void setfield(String fieldname, Object currentClass, String val) {
 			
 }
 
-public static void returnval(int ret) {
-	//TODO: implement
+public static Object returner(String ret, String classname, Object currentClass, String methodName, Object[] args) {
+
+	Type t = null;
+	Object returnval = null;
+	try {
+		Class<?> classassigned = Class.forName(classname);
+		Class<?>[] arguments = convertArgs(args);	
+		
+		Method methodFromClass = classassigned.getMethod(methodName,
+			arguments);
+	
+		t = methodFromClass.getGenericReturnType();
+		methodFromClass.setAccessible(true);
+	
+		if(t.equals(Integer.TYPE)){
+			try{
+				returnval = Integer.parseInt(ret);
+			}
+			catch (Exception e){
+				System.out.println("Invalid set argument. This argument type is integer.");
+			}
+		}
+			
+		else if(t.equals(Double.TYPE)){
+			try{
+				returnval = Double.parseDouble(ret);
+			}
+			catch (Exception e){
+				System.out.println("Invalid set argument. This argument type is double.");
+			}
+		}
+		else if(t.equals(Byte.TYPE)){
+			try{
+				returnval = Byte.parseByte(ret);
+			}
+			catch (Exception e){
+				System.out.println("Invalid set argument. This argument type is byte.");
+			}
+		}        		
+		else if(t.equals(Short.TYPE)){
+			try{
+				returnval = Short.parseShort(ret);
+			}
+			catch (Exception e){
+				System.out.println("Invalid set argument. This argument type is short.");
+			}
+		}                		
+		else if(t.equals(Long.TYPE)){
+			try{
+				returnval = Long.parseLong(ret);
+			}
+			catch (Exception e){
+				System.out.println("Invalid set argument. This argument type is long.");
+			}
+		}        		
+		else if(t.equals(Float.TYPE)){
+			try{
+				returnval = Float.parseFloat(ret);
+			}
+			catch (Exception e){
+				System.out.println("Invalid set argument. This argument type is float.");
+			}
+		}        		
+		else if(t.equals(Character.TYPE)){
+			try{
+				returnval = ret.charAt(0);
+			}
+			catch (Exception e){
+				System.out.println("Invalid set argument. This argument type is a character.");
+			}
+		}
+		else if(t.equals(Boolean.TYPE)){
+			try{
+				returnval = Boolean.parseBoolean(ret);
+			}
+			catch (Exception e){
+				System.out.println("Invalid set argument. This argument type is boolean.");
+			}
+		}
+	} 
+	catch (Exception e) {
+		System.out.println(e.getCause());
+	}
+	return returnval;
+	
 }
 
 public static void throwagain(Exception e) throws Throwable {
-	throw e.getCause();
+	if(callStack.size() > 0){
+		callStack.pop();
+		throw e.getCause();
+	}
+	else System.out.println("Call Stack Empty. Cannot throw any more exceptions.");
+
 }
 
 public static void info(String className, Object currentClass, String methodName, Object[] args) {
@@ -273,19 +358,26 @@ public static void info(String className, Object currentClass, String methodName
 		Class<?> classAssigned = Class.forName(className);
 		Field[] fields = classAssigned.getDeclaredFields();
 		String vars = new String();
+		String classNameToPresent = "null";
 		
 		for(Field f : fields){
 			vars += f.getName() + " ";
 		}
 		
-		System.out.println("Called Object: " + currentClass.toString());
+		classNameToPresent = currentClass.toString();
+		
+		System.out.println("Called Object: " + classNameToPresent);
 		System.out.println("       Fields: " + vars);
 		System.out.println("Call Stack:");
-			//TODO: imprimir a stack toda;
+		
+		for (int i = callStack.size() - 1 ; i > -1 ; i--) {
+			String call = callStack.get(i);
+			System.out.println(call);
 		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
+	}
+	catch(Exception e){
+		System.out.println(e.getCause());
+	}
 		
 	}
 
