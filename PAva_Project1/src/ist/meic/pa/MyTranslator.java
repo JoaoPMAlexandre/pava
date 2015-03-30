@@ -31,9 +31,15 @@ public class MyTranslator implements Translator {
 	        		        public void edit(MethodCall mc) 
 	        		        		throws CannotCompileException {
 
+
 	        		        	mc.replace("{$_ = ($r) DebuggFunctions.trycatch(\"" + 
 	        		        			mc.getClassName() + "\", $0, \"" + 
 	        		        			mc.getMethodName() + "\", $args); }");
+	        		        	
+	        		        	/*if(mc.getMethodName().equals("main")){
+	        		        		mc.replace("{S_ = ($r) DebuggFunctions.callStack"
+	        		        				+ ".push(\"main(\" + parseMainArgs($$)");
+	        		        	}*/
 
 	        		        }
 	        		    });

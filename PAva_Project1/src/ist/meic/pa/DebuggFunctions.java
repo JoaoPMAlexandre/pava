@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Stack;
@@ -28,19 +29,20 @@ public final class DebuggFunctions {
 			methodFromClass.setAccessible(true);
 		
 		//if(classassigned.getName().contains(Class.forName(name).getPackage().getName()))
-			callStack.push(classassigned.getName() + "." + methodName + parseArgs(args));
-		
+
+		callStack.push(classassigned.getName() + "." + methodName + parseArgs(args));
 		methodFromClass.invoke(classassigned.cast(currentClass), args);
+		callStack.pop();
 		
-		
-	} catch (Exception e) {
+	} catch (InvocationTargetException e) {
 
 		System.out.println(e.getCause());
-		callStack.pop();
 		if(!retry){
-			//GUARDAR OS METODOS E ARGUMENTOS DA CALLSTACK
+			
 			runDebugger(e, classname, currentClass, methodName, args);
 		}
+		else callStack.pop();
+
 	}
 	return null;
 }
@@ -102,29 +104,44 @@ public static String parseArgs(Object[] args){
 	return arguments;
 }
 
+public static String parseMainArgs(String[] args){
+	String arguments = "(";
+	
+	for(int i = 0; i < args.length; i++){
+		String o = args[i];
+		arguments += o;
+		if(i != args.length - 1)
+			arguments += ",";
+	}
+	arguments += ")";
+	return arguments;
+}
+
 public static Class<?>[] convertArgs(Object[] args) {
 	
 	Class<?>[] arguments = new Class<?>[args.length];
 	for (int i = 0; i < args.length; i++) {
-		arguments[i] = args[i].getClass();
-		if (arguments[i].getName().equals("java.lang.Integer"))
-		arguments[i] = int.class;
-	else if (arguments[i].getName().equals("java.lang.Byte"))
-		arguments[i] = byte.class;
-	else if (arguments[i].getName().equals("java.lang.Short"))
-		arguments[i] = short.class;
-	else if (arguments[i].getName().equals("java.lang.Long"))
-		arguments[i] = long.class;
-	else if (arguments[i].getName().equals("java.lang.Float"))
-		arguments[i] = float.class;
-	else if (arguments[i].getName().equals("java.lang.Double"))
-		arguments[i] = double.class;
-	else if (arguments[i].getName().equals("java.lang.Character"))
-		arguments[i] = char.class;
-	else if (arguments[i].getName().equals("java.lang.Boolean"))
-		arguments[i] = boolean.class;
-	else if (arguments[i] == null)
-		arguments[i] = null;
+		if(args[i] == null)
+			arguments[i] = Object.class;
+		else{
+			arguments[i] = args[i].getClass();
+			if (args[i].getClass().getName().equals("java.lang.Integer"))
+				arguments[i] = int.class;
+			else if (args[i].getClass().getName().equals("java.lang.Byte"))
+				arguments[i] = byte.class;
+			else if (args[i].getClass().getName().equals("java.lang.Short"))
+				arguments[i] = short.class;
+			else if (args[i].getClass().getName().equals("java.lang.Long"))
+				arguments[i] = long.class;
+			else if (args[i].getClass().getName().equals("java.lang.Float"))
+				arguments[i] = float.class;
+			else if (args[i].getClass().getName().equals("java.lang.Double"))
+				arguments[i] = double.class;
+			else if (args[i].getClass().getName().equals("java.lang.Character"))
+				arguments[i] = char.class;
+			else if (args[i].getClass().getName().equals("java.lang.Boolean"))
+				arguments[i] = boolean.class;
+		}
 	}
 	
 	return arguments;
@@ -263,26 +280,7 @@ public static Object returnval(String ret, String classname, Object currentClass
 	
 	try {
 		Class<?> classassigned = Class.forName(classname);
-		Class<?>[] arguments = new Class<?>[args.length];
-		for (int i = 0; i < args.length; i++) {
-			arguments[i] = args[i].getClass();
-			if (arguments[i].getName().equals("java.lang.Integer"))
-			arguments[i] = int.class;
-		else if (arguments[i].getName().equals("java.lang.Byte"))
-			arguments[i] = byte.class;
-		else if (arguments[i].getName().equals("java.lang.Short"))
-			arguments[i] = short.class;
-		else if (arguments[i].getName().equals("java.lang.Long"))
-			arguments[i] = long.class;
-		else if (arguments[i].getName().equals("java.lang.Float"))
-			arguments[i] = float.class;
-		else if (arguments[i].getName().equals("java.lang.Double"))
-			arguments[i] = double.class;
-		else if (arguments[i].getName().equals("java.lang.Character"))
-			arguments[i] = char.class;
-		else if (arguments[i].getName().equals("java.lang.Boolean"))
-			arguments[i] = boolean.class;
-		}
+		Class<?>[] arguments = convertArgs(args);
 		
 		Method methodFromClass = classassigned.getMethod(methodName,
 			arguments);
@@ -390,8 +388,7 @@ public static void info(String className, Object currentClass, String methodName
 		System.out.println("Call Stack:");
 		
 		for (int i = callStack.size() - 1 ; i > -1 ; i--) {
-			String call = callStack.get(i);
-			System.out.println(call);
+			System.out.println(callStack.get(i));
 		}
 	}
 	catch(Exception e){

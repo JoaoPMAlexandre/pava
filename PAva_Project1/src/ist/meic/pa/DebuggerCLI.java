@@ -11,10 +11,11 @@ public class DebuggerCLI extends ClassLoader {
 		pool.importPackage("ist.meic.pa.DebuggFunctions");
 		Loader loader = new Loader(pool);
 		loader.addTranslator(pool, mytranslator);
-		
-		DebuggFunctions.callStack.push(args[0]); //Não faz nada por enquanto.
-		loader.run(args);
+		loader.run(args);	
+	
 	}
+	
+
 
 }
 
