@@ -14,6 +14,10 @@ public final class DebuggFunctions {
 	public static Stack<String> callStack = new Stack<String>();
 	public static String name = new String();
 	public static Object returnval = null;
+	public static Class<?> classassigned =null;
+	public static String Mname;
+	public static Object[] Argums;
+	
 	
 	public static boolean retry = false;
 	
@@ -21,7 +25,9 @@ public final class DebuggFunctions {
 			String methodName, Object[] args) throws Throwable {
 		
 		try {
-			Class<?> classassigned = Class.forName(classname);
+			Mname = methodName;
+			Argums = args;
+			classassigned = Class.forName(classname);
 			
 			Class<?>[] arguments = convertArgs(args);
 			Method methodFromClass = classassigned.getMethod(methodName,
@@ -33,15 +39,19 @@ public final class DebuggFunctions {
 		callStack.push(classassigned.getName() + "." + methodName + parseArgs(args));
 		methodFromClass.invoke(classassigned.cast(currentClass), args);
 		callStack.pop();
+		return returnval;
 		
-	} catch (InvocationTargetException e) {
+	} catch (InvocationTargetException|NullPointerException e) {
 
-		System.out.println(e.getCause());
+		System.err.println(e.getCause());
 		if(!retry){
 			
 			runDebugger(e, classname, currentClass, methodName, args);
+			return returnval;
 		}
-		else callStack.pop();
+		else {
+			callStack.pop();
+		}
 
 	}
 	return null;
@@ -53,7 +63,7 @@ public final class DebuggFunctions {
 public static Object runDebugger(Exception ex, String classname, Object currentClass, String methodName,
 		Object[] args) throws Throwable {
 
-	System.out.print("DebuggerCLI> ");
+	System.err.print("DebuggerCLI> ");
 	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 	String instruction = "default";
 
@@ -84,11 +94,20 @@ public static Object runDebugger(Exception ex, String classname, Object currentC
 		else if (cmd[0].toLowerCase().equals("abort"))
 			System.exit(1);
 		else if (!cmd[0].toLowerCase().equals("abort"))
-			System.out
+			System.err
 					.println("The command insert is not valid! Please insert a valid command.");
 
-		System.out.print("DebuggerCLI> ");
+		System.err.print("DebuggerCLI> ");
 	}
+}
+
+public static void push(String name, String[] mainargs){
+	callStack.push(name + parseMainArgs(mainargs));
+	
+}
+
+public static void pop(){
+	callStack.pop();
 }
 
 public static String parseArgs(Object[] args){
@@ -108,8 +127,8 @@ public static String parseMainArgs(String[] args){
 	String arguments = "(";
 	
 	for(int i = 0; i < args.length; i++){
-		String o = args[i];
-		arguments += o;
+		String s = args[i];
+		arguments += s;
 		if(i != args.length - 1)
 			arguments += ",";
 	}
@@ -152,7 +171,7 @@ public static void retry(String classname, Object currentClass, String methodnam
 	try {
 		trycatch(classname, currentClass, methodname, args);
 	} catch (Throwable e) {
-		System.out.println("Impossible call.");
+		System.err.println("Impossible call.");
 	}
 }
 
@@ -168,10 +187,10 @@ public static void getfield(String fieldname, Object currentClass) {
         	field.setAccessible(true);
         	try {
         		value = field.get(currentClass);
-            	System.out.println(value.toString());
+            	System.err.println(value.toString());
 			} 
         	catch (IllegalArgumentException|IllegalAccessException e) {
-        		System.out.println(e.getCause());
+        		System.err.println(e.getCause());
 			}
         	
 
@@ -179,7 +198,7 @@ public static void getfield(String fieldname, Object currentClass) {
 		}
 
 	}
-	System.out.println("Field not found.");		
+	System.err.println("Field not found.");		
 }
 
 
@@ -200,7 +219,7 @@ public static void setfield(String fieldname, Object currentClass, String val) {
         				value = Integer.parseInt(val);
         			}
         			catch (Exception e){
-        				System.out.println("Invalid set argument. This argument type is integer.");
+        				System.err.println("Invalid set argument. This argument type is integer.");
         			}
         		}
         			
@@ -209,7 +228,7 @@ public static void setfield(String fieldname, Object currentClass, String val) {
         				value = Double.parseDouble(val);
         			}
         			catch (Exception e){
-        				System.out.println("Invalid set argument. This argument type is double.");
+        				System.err.println("Invalid set argument. This argument type is double.");
         			}
         		}
         		else if(field.getType().equals(Byte.TYPE)){
@@ -217,7 +236,7 @@ public static void setfield(String fieldname, Object currentClass, String val) {
         				value = Byte.parseByte(val);
         			}
         			catch (Exception e){
-        				System.out.println("Invalid set argument. This argument type is byte.");
+        				System.err.println("Invalid set argument. This argument type is byte.");
         			}
         		}        		
         		else if(field.getType().equals(Short.TYPE)){
@@ -225,7 +244,7 @@ public static void setfield(String fieldname, Object currentClass, String val) {
         				value = Short.parseShort(val);
         			}
         			catch (Exception e){
-        				System.out.println("Invalid set argument. This argument type is short.");
+        				System.err.println("Invalid set argument. This argument type is short.");
         			}
         		}                		
         		else if(field.getType().equals(Long.TYPE)){
@@ -233,7 +252,7 @@ public static void setfield(String fieldname, Object currentClass, String val) {
         				value = Long.parseLong(val);
         			}
         			catch (Exception e){
-        				System.out.println("Invalid set argument. This argument type is long.");
+        				System.err.println("Invalid set argument. This argument type is long.");
         			}
         		}        		
         		else if(field.getType().equals(Float.TYPE)){
@@ -241,7 +260,7 @@ public static void setfield(String fieldname, Object currentClass, String val) {
         				value = Float.parseFloat(val);
         			}
         			catch (Exception e){
-        				System.out.println("Invalid set argument. This argument type is float.");
+        				System.err.println("Invalid set argument. This argument type is float.");
         			}
         		}        		
         		else if(field.getType().equals(Character.TYPE)){
@@ -249,7 +268,7 @@ public static void setfield(String fieldname, Object currentClass, String val) {
         				value = val.charAt(0);
         			}
         			catch (Exception e){
-        				System.out.println("Invalid set argument. This argument type is a character.");
+        				System.err.println("Invalid set argument. This argument type is a character.");
         			}
         		}
         		else if(field.getType().equals(Boolean.TYPE)){
@@ -257,7 +276,7 @@ public static void setfield(String fieldname, Object currentClass, String val) {
         				value = Boolean.parseBoolean(val);
         			}
         			catch (Exception e){
-        				System.out.println("Invalid set argument. This argument type is boolean.");
+        				System.err.println("Invalid set argument. This argument type is boolean.");
         			}
         		}
         		
@@ -265,7 +284,7 @@ public static void setfield(String fieldname, Object currentClass, String val) {
         		
 			} 
         	catch (IllegalArgumentException|IllegalAccessException e) {
-        		System.out.println("Invalid argument to set");
+        		System.err.println("Invalid argument to set");
 			}
 
 		}
@@ -293,7 +312,7 @@ public static Object returnval(String ret, String classname, Object currentClass
 				returnval = Integer.parseInt(ret);
 			}
 			catch (Exception e){
-				System.out.println("Invalid set argument. This argument type is integer.");
+				System.err.println("Invalid set argument. This argument type is integer.");
 			}
 		}
 			
@@ -302,7 +321,7 @@ public static Object returnval(String ret, String classname, Object currentClass
 				returnval = Double.parseDouble(ret);
 			}
 			catch (Exception e){
-				System.out.println("Invalid set argument. This argument type is double.");
+				System.err.println("Invalid set argument. This argument type is double.");
 			}
 		}
 		else if(t.equals(Byte.TYPE)){
@@ -310,7 +329,7 @@ public static Object returnval(String ret, String classname, Object currentClass
 				returnval = Byte.parseByte(ret);
 			}
 			catch (Exception e){
-				System.out.println("Invalid set argument. This argument type is byte.");
+				System.err.println("Invalid set argument. This argument type is byte.");
 			}
 		}        		
 		else if(t.equals(Short.TYPE)){
@@ -318,7 +337,7 @@ public static Object returnval(String ret, String classname, Object currentClass
 				returnval = Short.parseShort(ret);
 			}
 			catch (Exception e){
-				System.out.println("Invalid set argument. This argument type is short.");
+				System.err.println("Invalid set argument. This argument type is short.");
 			}
 		}                		
 		else if(t.equals(Long.TYPE)){
@@ -326,7 +345,7 @@ public static Object returnval(String ret, String classname, Object currentClass
 				returnval = Long.parseLong(ret);
 			}
 			catch (Exception e){
-				System.out.println("Invalid set argument. This argument type is long.");
+				System.err.println("Invalid set argument. This argument type is long.");
 			}
 		}        		
 		else if(t.equals(Float.TYPE)){
@@ -334,7 +353,7 @@ public static Object returnval(String ret, String classname, Object currentClass
 				returnval = Float.parseFloat(ret);
 			}
 			catch (Exception e){
-				System.out.println("Invalid set argument. This argument type is float.");
+				System.err.println("Invalid set argument. This argument type is float.");
 			}
 		}        		
 		else if(t.equals(Character.TYPE)){
@@ -342,7 +361,7 @@ public static Object returnval(String ret, String classname, Object currentClass
 				returnval = ret.charAt(0);
 			}
 			catch (Exception e){
-				System.out.println("Invalid set argument. This argument type is a character.");
+				System.err.println("Invalid set argument. This argument type is a character.");
 			}
 		}
 		else if(t.equals(Boolean.TYPE)){
@@ -350,8 +369,11 @@ public static Object returnval(String ret, String classname, Object currentClass
 				returnval = Boolean.parseBoolean(ret);
 			}
 			catch (Exception e){
-				System.out.println("Invalid set argument. This argument type is boolean.");
+				System.err.println("Invalid set argument. This argument type is boolean.");
 			}
+		}
+		else if(t.equals(null)){
+			returnval = null;
 		}
 	} 
 	catch (Exception e) {
@@ -366,7 +388,7 @@ public static void throwagain(Exception e) throws Throwable {
 		callStack.pop();
 		throw e.getCause();
 	}
-	else System.out.println("Call Stack Empty. Cannot throw any more exceptions.");
+	else System.err.println("Call Stack Empty. Cannot throw any more exceptions.");
 
 }
 
@@ -383,16 +405,16 @@ public static void info(String className, Object currentClass, String methodName
 		
 		classNameToPresent = currentClass.toString();
 		
-		System.out.println("Called Object: " + classNameToPresent);
-		System.out.println("       Fields: " + vars);
-		System.out.println("Call Stack:");
+		System.err.println("Called Object: " + classNameToPresent);
+		System.err.println("       Fields: " + vars);
+		System.err.println("Call Stack:");
 		
 		for (int i = callStack.size() - 1 ; i > -1 ; i--) {
-			System.out.println(callStack.get(i));
+			System.err.println(callStack.get(i));
 		}
 	}
 	catch(Exception e){
-		System.out.println(e.getCause());
+		System.err.println(e.getCause());
 	}
 		
 	}
