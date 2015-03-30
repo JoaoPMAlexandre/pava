@@ -12,7 +12,7 @@ public final class DebuggFunctions {
 	
 	public static Stack<String> callStack = new Stack<String>();
 	public static String name = new String();
-	public static Object returnVal = null;
+	public static Object returnval = null;
 	
 	public static boolean retry = false;
 	
@@ -70,8 +70,8 @@ public static Object runDebugger(Exception ex, String classname, Object currentC
 		else if (cmd[0].toLowerCase().equals("throw"))
 			throwagain(ex);
 		else if (cmd[0].toLowerCase().equals("return")){
-			returnVal = returner(cmd[1], classname, currentClass, methodName, args);
-			return returnVal;
+			returnval = returnval(cmd[1], classname, currentClass, methodName, args);
+			return returnval;
 		}
 		else if (cmd[0].toLowerCase().equals("get"))
 			getfield(cmd[1], currentClass);
@@ -257,13 +257,32 @@ public static void setfield(String fieldname, Object currentClass, String val) {
 			
 }
 
-public static Object returner(String ret, String classname, Object currentClass, String methodName, Object[] args) {
+public static Object returnval(String ret, String classname, Object currentClass, String methodName, Object[] args) {
 
 	Type t = null;
-	Object returnval = null;
+	
 	try {
 		Class<?> classassigned = Class.forName(classname);
-		Class<?>[] arguments = convertArgs(args);	
+		Class<?>[] arguments = new Class<?>[args.length];
+		for (int i = 0; i < args.length; i++) {
+			arguments[i] = args[i].getClass();
+			if (arguments[i].getName().equals("java.lang.Integer"))
+			arguments[i] = int.class;
+		else if (arguments[i].getName().equals("java.lang.Byte"))
+			arguments[i] = byte.class;
+		else if (arguments[i].getName().equals("java.lang.Short"))
+			arguments[i] = short.class;
+		else if (arguments[i].getName().equals("java.lang.Long"))
+			arguments[i] = long.class;
+		else if (arguments[i].getName().equals("java.lang.Float"))
+			arguments[i] = float.class;
+		else if (arguments[i].getName().equals("java.lang.Double"))
+			arguments[i] = double.class;
+		else if (arguments[i].getName().equals("java.lang.Character"))
+			arguments[i] = char.class;
+		else if (arguments[i].getName().equals("java.lang.Boolean"))
+			arguments[i] = boolean.class;
+		}
 		
 		Method methodFromClass = classassigned.getMethod(methodName,
 			arguments);
@@ -338,7 +357,7 @@ public static Object returner(String ret, String classname, Object currentClass,
 		}
 	} 
 	catch (Exception e) {
-		System.out.println(e.getCause());
+		
 	}
 	return returnval;
 	

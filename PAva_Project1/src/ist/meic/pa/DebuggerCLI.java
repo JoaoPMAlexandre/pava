@@ -12,7 +12,7 @@ public class DebuggerCLI extends ClassLoader {
 		Loader loader = new Loader(pool);
 		loader.addTranslator(pool, mytranslator);
 		
-		DebuggFunctions.callStack.push(args[0]); //Não faz nada so far.
+		DebuggFunctions.callStack.push(args[0]); //Não faz nada por enquanto.
 		loader.run(args);
 	}
 
