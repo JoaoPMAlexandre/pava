@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Debugger" default="run" basedir=".">
+  <description>PAva Lab1 Build File</description>
+    
+
+  <property name="ant.build.javac.source" value="1.7"/>
+  <property name="ant.build.javac.target" value="1.7"/>
+
+  <property name="javac.encoding" value="UTF-8"/>
+  <property name="java.file.encoding" value="UTF-8"/>
+  
+  <property name="src.rel-dir" value="src"/>
+  <property name="classes.rel-dir" value="classes"/>
+  <property name="build.rel-dir" value="build"/>
+  
+
+
+
+  <path id="project.classpath">
+  	<pathelement location="${classes.rel-dir}" />
+  </path>
+  
+  <target name="init">
+    <echo message="Preparing the project for build..."/>
+    <mkdir dir="${classes.rel-dir}"/>
+  </target>
+
+
+  <target name="compile" depends="init">
+  	<echo message="Compiling sources..." />
+  	    <javac srcdir="${src.rel-dir}" destdir="${classes.rel-dir}" classpath="lib/javassist.jar"/>
+  	
+  	</target>
+
+  <target name="run" depends="compile">
+    <jar destfile="${src.rel-dir}/../debugger.jar">
+        <manifest>
+            <attribute name="Main-Class" value="ist.meic.pa.DebuggerCLI"/>
+        	<attribute name="Class-Path" value="."/>
+        </manifest>
+        <fileset dir="${classes.rel-dir}"/>            
+        <zipfileset src="lib/javassist.jar"/>     
+    </jar>
+  </target>
+  
+  <target name="clean">
+    <delete dir="${classes.rel-dir}"/>
+  	<delete dir="${build.rel-dir}"/>
+  	
+ </target>
+
+</project>
